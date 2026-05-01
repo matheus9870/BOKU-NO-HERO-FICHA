@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RPG Mobile - Multi-Tags System</title>
+  <style>
+    :root { --bg: #0f0f0f; --card: #1c1c1c; --accent: #ff2e88; --tab-inactive: #222; --save-color: #3cb371; }
+    body { font-family: sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 10px; display: flex; flex-direction: column; gap: 15px; }
+    
+    @media (min-width: 768px) { body { flex-direction: row; } .admin { width: 380px; position: sticky; top: 10px; height: 95vh; } }
+
+    .admin { background: #181818; padding: 15px; border-radius: 12px; border: 1px solid #333; display: flex; flex-direction: column; }
+    
+    #save-indicator { font-size: 10px; color: var(--save-color); text-align: right; margin-bottom: 5px; opacity: 0; transition: opacity 0.5s; font-weight: bold; }
+
+    .tab-container { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; background: #000; padding: 5px; border-radius: 8px; }
+    .tab-btn { flex: 1; min-width: 80px; padding: 10px; font-size: 10px; background: var(--tab-inactive); color: #888; border-radius: 5px; border: none; text-transform: uppercase; font-weight: bold; }
+    .tab-btn.active { background: var(--accent); color: white; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .filter-bar { background: #181818; padding: 12px; border-radius: 12px; border: 1px solid #333; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .filter-group { display: flex; gap: 8px; }
+    .filter-bar input, .filter-bar select { margin: 0; padding: 10px; font-size: 14px; flex: 1; }
+
+    .card-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); gap: 15px; flex-grow: 1; align-content: start; }
+    
+    .sheet { background: var(--card); padding: 15px; border-radius: 12px; border-top: 5px solid #444; }
+    .active-plus { border-top-color: var(--accent) !important; box-shadow: 0 0 15px rgba(255, 46, 136, 0.3); }
+
+    .energy-bar-bg { background: #333; height: 15px; border-radius: 10px; margin: 12px 0; overflow: hidden; }
+    .energy-bar-fill { height: 100%; width: 100%; transition: width 0.3s; }
+
+    input, select { background: #2a2a2a; color: white; padding: 12px; margin: 5px 0; border-radius: 8px; border: 1px solid #444; font-size: 16px; width: -webkit-fill-available; }
+    button { padding: 15px; margin: 5px 0; border-radius: 8px; border: none; font-weight: bold; font-size: 13px; cursor: pointer; width: 100%; touch-action: manipulation; text-transform: uppercase; }
+
+    .btn-add { background: #3cb371; color: white; }
+    .btn-simple { background: #2d6cdf; color: white; }
+    .btn-moderate { background: #e0a800; color: black; }
+    .btn-complex { background: #d9534f; color: white; }
+    .btn-rest { background: #ff9800; color: white; }
+    .plus { background: var(--accent); color: white; margin-top: 10px; font-size: 15px; }
+
+    .zone { padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 10px; font-size: 14px; }
+    .green { background: #1e7f3d; } .orange { background: #b36b00; } .red { background: #a31212; }
+    .collapse { background: #2b0a3d; animation: pulse 1s infinite; }
+    
+    .badge-container { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+    .badge { font-size: 9px; padding: 2px 6px; border-radius: 4px; background: #333; color: #fff; border: 1px solid var(--accent); text-transform: uppercase; }
+
+    .tag-selector-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; background: #111; padding: 10px; border-radius: 8px; margin: 10px 0; max-height: 150px; overflow-y: auto; }
+    .tag-checkbox { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #ccc; }
+    .tag-checkbox input { width: 18px; height: 18px; margin: 0; }
+
+    .tag-manager-list { max-height: 200px; overflow-y: auto; margin-top: 10px; }
+    .tag-item { display: flex; justify-content: space-between; align-items: center; background: #222; padding: 8px 12px; margin: 4px 0; border-radius: 6px; }
+    .tag-del { color: var(--accent); font-weight: bold; cursor: pointer; padding: 5px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    td input { width: 45px; padding: 8px; text-align: center; background: #000; border: 1px solid #444; color: #fff; }
+    .log-box { font-size: 11px; color: #888; background: #000; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid #333; height: 80px; overflow-y: auto; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+<div class="admin">
+  <div id="save-indicator">● SINCRONIZADO</div>
+  <div class="tab-container">
+    <button class="tab-btn active" onclick="openTab('tab-main', this)">Painel</button>
+    <button class="tab-btn" onclick="openTab('tab-zones', this)">Zonas</button>
+    <button class="tab-btn" onclick="openTab('tab-tags', this)">Tags</button>
+    <button class="tab-btn" onclick="openTab('tab-files', this)">Arquivos</button>
+  </div>
+
+  <div id="tab-main" class="tab-content active">
+    <button class="btn-add" onclick="addSheet()">+ Novo Personagem</button>
+    <div id="logs" class="log-box"></div>
+  </div>
+
+  <div id="tab-zones" class="tab-content">
+    <h4 style="margin: 0 0 10px 0;">📈 Limites por Nível</h4>
+    <table>
+      <thead><tr><th>Nív</th><th>🟢</th><th>🟡</th><th>Máx</th></tr></thead>
+      <tbody id="lvlBody"></tbody>
+    </table>
+    <button onclick="applyLevels()" style="background:#444; color:white; margin-top:10px">Sincronizar Zonas</button>
+  </div>
+
+  <div id="tab-tags" class="tab-content">
+    <h4 style="margin: 0 0 10px 0;">🏷️ Gerenciar Biblioteca de Tags</h4>
+    <div style="display: flex; gap: 5px;">
+        <input type="text" id="newTagInput" placeholder="Ex: Boss, Elite..." style="font-size: 14px;">
+        <button onclick="addTag()" style="width: 60px; padding: 0; background: var(--accent);">+</button>
+    </div>
+    <div id="tagManagerList" class="tag-manager-list"></div>
+  </div>
+
+  <div id="tab-files" class="tab-content">
+    <h4>📤 Backup</h4>
+    <button onclick="exportData()" style="background:#555; color:white;">Exportar JSON</button>
+    <button onclick="document.getElementById('fileIn').click()" style="background:#555; color:white;">Importar JSON</button>
+    <input type="file" id="fileIn" style="display:none" accept=".json" onchange="handleFile(event)">
+    <button onclick="resetAll()" style="background:transparent; border:1px solid #d9534f; color:#d9534f; margin-top:20px; font-size:10px">Limpar Tudo</button>
+  </div>
+</div>
+
+<div style="flex-grow: 1;">
+  <div class="filter-bar">
+    <input type="text" id="searchName" placeholder="🔍 Buscar por nome..." oninput="filterSheets()">
+    <div class="filter-group">
+      <select id="filterTag" onchange="filterSheets()">
+        <option value="">Qualquer Tag</option>
+      </select>
+      <select id="filterLevel" onchange="filterSheets()">
+        <option value="">Todos os Níveis</option>
+        <script>for(let i=0; i<10; i++) document.write(`<option value="${i}">Nível ${i+1}</option>`)</script>
+      </select>
+    </div>
+  </div>
+  <div class="card-container" id="container"></div>
+</div>
+
+<script>
+let sheets = []; let idCount = 0; let logs = [];
+let tags = ["1-A", "1-B", "Vilão", "NPC"];
+let levels = Array.from({length:10}, (_,i)=>({ green: 7+(i*2), orange: 4+(i*2), energy: 10+(i*2) }));
+
+window.onload = () => {
+    const data = JSON.parse(localStorage.getItem('rpg_multi_tags_v1') || '{}');
+    if(data.sheets) {
+        sheets = data.sheets; idCount = data.idCount; 
+        levels = data.levels || levels;
+        tags = data.tags || tags;
+        sheets.forEach(renderSheet);
+        updateAll();
+    }
+    buildTable();
+    renderTagManager();
+    updateFilterOptions();
+};
+
+function autoSave() {
+    localStorage.setItem('rpg_multi_tags_v1', JSON.stringify({sheets, idCount, levels, tags}));
+    const indicator = document.getElementById('save-indicator');
+    indicator.style.opacity = 1;
+    setTimeout(() => { indicator.style.opacity = 0; }, 1000);
+}
+
+function openTab(tabId, btn) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    btn.classList.add('active');
+}
+
+// TAGS
+function addTag() {
+    const input = document.getElementById('newTagInput');
+    const val = input.value.trim().toUpperCase();
+    if(val && !tags.includes(val)) {
+        tags.push(val);
+        input.value = "";
+        renderTagManager();
+        updateFilterOptions();
+        autoSave();
+    }
+}
+
+function deleteTag(index) {
+    if(confirm("Remover tag da biblioteca?")) {
+        tags.splice(index, 1);
+        renderTagManager();
+        updateFilterOptions();
+        autoSave();
+    }
+}
+
+function renderTagManager() {
+    const list = document.getElementById('tagManagerList');
+    list.innerHTML = tags.map((t, i) => `
+        <div class="tag-item">
+            <span>${t}</span>
+            <span class="tag-del" onclick="deleteTag(${i})">✕</span>
+        </div>
+    `).join("");
+}
+
+function updateFilterOptions() {
+    const filterSelect = document.getElementById('filterTag');
+    const current = filterSelect.value;
+    filterSelect.innerHTML = '<option value="">Qualquer Tag</option>' + 
+        tags.map(t => `<option value="${t}" ${t==current?'selected':''}>${t}</option>`).join("");
+}
+
+// ZONAS
+function buildTable() {
+    const b = document.getElementById('lvlBody'); b.innerHTML = "";
+    levels.forEach((l, i) => {
+        b.innerHTML += `<tr><td>${i+1}</td>
+        <td><input type="number" value="${l.green}" id="g${i}"></td>
+        <td><input type="number" value="${l.orange}" id="o${i}"></td>
+        <td><input type="number" value="${l.energy}" id="e${i}"></td></tr>`;
+    });
+}
+
+function applyLevels() {
+    levels.forEach((l, i) => {
+        l.green = +document.getElementById(`g${i}`).value;
+        l.orange = +document.getElementById(`o${i}`).value;
+        l.energy = +document.getElementById(`e${i}`).value;
+    });
+    updateAll(); autoSave(); addLog("Zonas sincronizadas");
+}
+
+// FICHAS
+function addSheet() {
+    let s = {id: idCount++, name: "Novo Herói", selectedTags: [], level: 0, energy: 10, confirmed: false, plus: 0};
+    sheets.push(s); renderSheet(s); autoSave();
+}
+
+function renderSheet(s) {
+    let div = document.createElement('div'); 
+    div.className = "sheet"; 
+    div.id = "c"+s.id;
+
+    div.innerHTML = `
+        <div id="ed${s.id}" class="${s.confirmed?'hidden':''}">
+            <input id="n${s.id}" value="${s.name}" placeholder="Nome do Personagem">
+            <select id="l${s.id}">${levels.map((_,i)=>`<option value="${i}" ${s.level==i?'selected':''}>Nível ${i+1}</option>`)}</select>
+            <p style="font-size:11px; color:#888; margin:10px 0 5px">Selecionar Tags:</p>
+            <div class="tag-selector-grid" id="ts${s.id}">
+                ${tags.map(t => `
+                    <label class="tag-checkbox">
+                        <input type="checkbox" value="${t}" ${s.selectedTags.includes(t)?'checked':''}> ${t}
+                    </label>
+                `).join("")}
+            </div>
+            <button class="btn-add" onclick="conf(${s.id})">Confirmar Personagem</button>
+            <button style="background:transparent; color:#666; font-size:10px" onclick="deleteSheet(${s.id})">Excluir Ficha</button>
+        </div>
+        <div id="vi${s.id}" class="${s.confirmed?'':'hidden'}">
+            <div style="display:flex; justify-content:space-between; align-items:start">
+                <div style="flex:1">
+                    <b id="vn${s.id}" style="font-size:18px">${s.name}</b>
+                    <span class="badge" style="background:#444" id="vl${s.id}">NV. ${s.level+1}</span>
+                    <div class="badge-container" id="vb${s.id}">
+                        ${s.selectedTags.map(t => `<span class="badge">${t}</span>`).join("")}
+                    </div>
+                </div>
+                <span onclick="toggle(${s.id})" style="color:#666; font-size:11px; border:1px solid #333; padding:2px 5px; border-radius:4px">EDITAR</span>
+            </div>
+            <div id="z${s.id}" class="zone green">ZONA VERDE</div>
+            <div class="energy-bar-bg"><div id="b${s.id}" class="energy-bar-fill"></div></div>
+            <h2 id="st${s.id}" style="text-align:center; margin:5px 0; font-family:monospace"></h2>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px">
+                <button class="btn-simple" onclick="use(${s.id},1)">Leve (-1)</button>
+                <button class="btn-moderate" onclick="use(${s.id},2)">Média (-2)</button>
+                <button class="btn-complex" onclick="use(${s.id},3)">Pesada (-3)</button>
+                <button class="btn-rest" onclick="rest(${s.id})">Descanso</button>
+            </div>
+            <button class="plus" onclick="pu(${s.id})">PLUS ULTRA</button>
+        </div>`;
+    document.getElementById('container').appendChild(div);
+}
+
+function conf(id) {
+    let s = sheets.find(x=>x.id==id);
+    s.name = document.getElementById('n'+id).value;
+    s.level = +document.getElementById('l'+id).value;
+    
+    // Coletar Checkboxes
+    const container = document.getElementById('ts'+id);
+    const checked = container.querySelectorAll('input:checked');
+    s.selectedTags = Array.from(checked).map(cb => cb.value);
+
+    s.energy = levels[s.level].energy; s.confirmed = true;
+    
+    document.getElementById('ed'+id).classList.add('hidden');
+    document.getElementById('vi'+id).classList.remove('hidden');
+    
+    update(id); autoSave(); filterSheets();
+}
+
+function filterSheets() {
+    const nameQuery = document.getElementById('searchName').value.toLowerCase();
+    const tagQuery = document.getElementById('filterTag').value;
+    const levelQuery = document.getElementById('filterLevel').value;
+
+    sheets.forEach(s => {
+        const matchesName = s.name.toLowerCase().includes(nameQuery);
+        const matchesTag = tagQuery === "" || s.selectedTags.includes(tagQuery);
+        const matchesLevel = levelQuery === "" || s.level == levelQuery;
+
+        const card = document.getElementById("c" + s.id);
+        if (matchesName && matchesTag && matchesLevel) card.classList.remove('hidden');
+        else card.classList.add('hidden');
+    });
+}
+
+function use(id, v) { 
+    let s = sheets.find(x=>x.id==id); 
+    if(s.energy > 0) s.energy = Math.max(0, s.energy - v); 
+    update(id); autoSave(); 
+}
+
+function rest(id) { 
+    let s = sheets.find(x=>x.id==id); 
+    s.energy = Math.min(levels[s.level].energy, s.energy + 2); 
+    update(id); autoSave(); 
+}
+
+function pu(id) {
+    let s = sheets.find(x=>x.id==id);
+    if(s.energy <= 0) { s.energy = Math.floor(levels[s.level].energy/2); s.plus = 1; update(id); autoSave(); addLog(s.name + " PLUS ULTRA!"); }
+}
+
+function update(id) {
+    let s = sheets.find(x=>x.id==id); let l = levels[s.level];
+    let z = document.getElementById('z'+id); let bar = document.getElementById('b'+id);
+    let card = document.getElementById('c'+id);
+
+    if(s.energy <= 0) { z.className="zone collapse"; z.innerText="COLAPSO"; bar.style.background="#2b0a3d"; }
+    else if(s.energy >= l.green) { z.className="zone green"; z.innerText="ZONA VERDE"; bar.style.background="#3cb371"; }
+    else if(s.energy >= l.orange) { z.className="zone orange"; z.innerText="ZONA LARANJA"; bar.style.background="#e0a800"; }
+    else { z.className="zone red"; z.innerText="ZONA VERMELHA"; bar.style.background="#d9534f"; }
+
+    bar.style.width = (s.energy/l.energy*100)+"%";
+    document.getElementById('st'+id).innerText = s.energy + " / " + l.energy;
+    document.getElementById('vn'+id).innerText = s.name;
+    document.getElementById('vl'+id).innerText = "NV. " + (s.level + 1);
+    document.getElementById('vb'+id).innerHTML = s.selectedTags.map(t => `<span class="badge">${t}</span>`).join("");
+    
+    if(s.plus) card.classList.add('active-plus');
+}
+
+function deleteSheet(id) {
+    if(confirm("Excluir esta ficha permanentemente?")) {
+        sheets = sheets.filter(x => x.id !== id);
+        document.getElementById('c'+id).remove();
+        autoSave();
+    }
+}
+
+function updateAll() { sheets.forEach(s=>update(s.id)); }
+function toggle(id) { 
+    const ed = document.getElementById('ed'+id);
+    const s = sheets.find(x=>x.id==id);
+    const ts = document.getElementById('ts'+id);
+    
+    // Atualiza lista de checkboxes na edição
+    ts.innerHTML = tags.map(t => `
+        <label class="tag-checkbox">
+            <input type="checkbox" value="${t}" ${s.selectedTags.includes(t)?'checked':''}> ${t}
+        </label>
+    `).join("");
+
+    ed.classList.toggle('hidden'); 
+    document.getElementById('vi'+id).classList.toggle('hidden'); 
+}
+
+function addLog(text) {
+    const time = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+    logs.unshift(`<div>[${time}] ${text}</div>`);
+    if(logs.length > 5) logs.pop();
+    document.getElementById('logs').innerHTML = logs.join("");
+}
+
+function exportData() { 
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({sheets, idCount, levels, tags}));
+    const a = document.createElement('a'); a.setAttribute("href", dataStr); a.setAttribute("download", "rpg_master_backup.json"); a.click();
+}
+
+function handleFile(e) {
+    let f = e.target.files[0]; if(!f) return;
+    let r = new FileReader();
+    r.onload = (ev) => {
+        let d = JSON.parse(ev.target.result); 
+        sheets = d.sheets; idCount = d.idCount; levels = d.levels; tags = d.tags || [];
+        document.getElementById('container').innerHTML = ""; 
+        sheets.forEach(renderSheet); 
+        buildTable(); renderTagManager(); updateFilterOptions(); updateAll(); autoSave(); filterSheets();
+        addLog("Backup Restaurado!");
+    }; r.readAsText(f);
+}
+
+function resetAll() {
+    if(confirm("Limpar navegador?")) { localStorage.clear(); location.reload(); }
+}
+</script>
+</body>
+</html>
