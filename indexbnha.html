@@ -1,1 +1,318 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>U.A. High School | Student Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ua-blue: #0c234b;
+            --ua-red: #ab0520;
+            --ua-gold: #ffc844;
+            --ua-white: #ffffff;
+            --zona-verde: #27ae60;
+            --zona-laranja: #e67e22;
+            --zona-vermelha: #c0392b;
+            --zona-colapso: #1a1a1a;
+            --rank-s: #f1c40f;
+            --rank-a: #9b59b6;
+            --rank-b: #3498db;
+            --rank-c: #95a5a6;
+        }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--ua-blue);
+            background-image: radial-gradient(rgba(255,255,255,0.05) 2px, transparent 0);
+            background-size: 25px 25px;
+            color: var(--ua-white);
+            line-height: 1.6;
+        }
+
+        /* HEADER HEROICO */
+        header {
+            background: var(--ua-red);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 8px solid var(--ua-gold);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header h1 {
+            font-family: 'Anton', sans-serif;
+            font-size: 3.5rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 4px 4px 0px var(--ua-blue);
+        }
+
+        /* NAVEGAÇÃO POR ABAS */
+        nav {
+            display: flex;
+            justify-content: center;
+            background: var(--ua-blue);
+            padding: 15px;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: 2px solid var(--ua-gold);
+            color: var(--ua-gold);
+            padding: 10px 25px;
+            font-family: 'Anton';
+            font-size: 1.2rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        .tab-btn.active, .tab-btn:hover {
+            background: var(--ua-gold);
+            color: var(--ua-blue);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* ANIMAÇÃO DE CONTEÚDO */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CARDS DE REGRAS */
+        .section-card {
+            background: var(--ua-white);
+            color: var(--ua-blue);
+            padding: 40px;
+            border-radius: 2px;
+            margin-bottom: 30px;
+            border-left: 15px solid var(--ua-red);
+            box-shadow: 12px 12px 0px var(--ua-gold);
+        }
+
+        h2 { 
+            font-family: 'Anton', sans-serif; 
+            font-size: 2.5rem; 
+            margin-bottom: 20px; 
+            text-transform: uppercase;
+            border-bottom: 4px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        p { margin-bottom: 15px; font-size: 1.1rem; }
+
+        /* GRID DE ZONAS */
+        .zona-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .zona-item {
+            padding: 20px;
+            text-align: center;
+            font-weight: 900;
+            color: white;
+            border: 4px solid var(--ua-blue);
+            text-transform: uppercase;
+        }
+
+        /* LISTA DE AÇÕES */
+        .acoes-list {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .acoes-list li {
+            background: #f8f8f8;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-left: 5px solid var(--ua-gold);
+            font-weight: 700;
+        }
+
+        /* GRID DE RANKS ARSENAL */
+        .rank-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .rank-card {
+            padding: 20px;
+            border: 4px solid var(--ua-blue);
+            text-align: center;
+            background: #fafafa;
+        }
+
+        .rank-tag {
+            display: inline-block;
+            padding: 5px 15px;
+            font-family: 'Anton';
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: white;
+            width: 100%;
+        }
+
+        /* BOX PLUS ULTRA */
+        .highlight-box {
+            background: var(--ua-gold);
+            color: var(--ua-blue);
+            padding: 30px;
+            margin-top: 20px;
+            border: 6px solid var(--ua-blue);
+            transform: rotate(-1deg);
+            text-align: center;
+        }
+
+        .highlight-box h3 { font-family: 'Anton'; font-size: 2rem; }
+
+        .obtenção-info {
+            background: #fdf2f2;
+            padding: 20px;
+            border: 2px dashed var(--ua-red);
+            margin-top: 25px;
+            font-weight: 700;
+            text-align: center;
+            color: var(--ua-red);
+        }
+
+        footer { text-align: center; padding: 60px 20px; opacity: 0.7; font-weight: 700; text-transform: uppercase; }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 2.2rem; }
+            nav { flex-wrap: wrap; }
+            .tab-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>U.A. STUDENT MANUAL</h1>
+    <p style="font-weight: 900; letter-spacing: 3px;">DEPARTAMENTO DE HERÓIS - NOVAS DIRETRIZES</p>
+</header>
+
+<nav>
+    <button class="tab-btn active" onclick="openTab('sistema')">Sistema Narrativo</button>
+    <button class="tab-btn" onclick="openTab('equipamentos')">Arsenal & Ranks</button>
+</nav>
+
+<div class="container">
+
+    <div id="sistema" class="tab-content active">
+        <div class="section-card">
+            <h2>Uso Narrativo</h2>
+            <p>O sistema de individualidades agora foca na <strong>interpretação criativa</strong>. Turnos rígidos de nerf foram removidos para garantir fluidez entre todos os tipos de poderes.</p>
+        </div>
+
+        <div class="section-card">
+            <h2>Sistema de Zona</h2>
+            <p>Sua estamina é dividida em 4 estágios. Identifique seu estado atual:</p>
+            <div class="zona-container">
+                <div class="zona-item" style="background: var(--zona-verde);">🟢 Verde</div>
+                <div class="zona-item" style="background: var(--zona-laranja);">🟠 Laranja</div>
+                <div class="zona-item" style="background: var(--zona-vermelha);">🔴 Vermelho</div>
+                <div class="zona-item" style="background: var(--zona-colapso);">⚫ Colapso</div>
+            </div>
+            <p>Na zona <strong>Laranja</strong>, o uso é levemente reduzido. Na <strong>Vermelha</strong>, a exaustão limita o poder. No <strong>Colapso</strong>, o uso é bloqueado.</p>
+        </div>
+
+        <div class="section-card">
+            <h2>Intensidade na Cena</h2>
+            <p>Limites de ações por cena baseados no esforço da individualidade:</p>
+            <ul class="acoes-list">
+                <li>LEVE: 1 Ação na cena</li>
+                <li>MÉDIO: 2 Ações na cena</li>
+                <li>PESADO / MÁXIMO: 3 Ações na cena</li>
+            </ul>
+        </div>
+
+        <div class="section-card">
+            <h2>Superação e Descanso</h2>
+            <p><strong>Descanso:</strong> Saia da luta e fique parado por <strong>1 turno inteiro</strong> para recuperar fôlego e subir de zona.</p>
+            <div class="highlight-box">
+                <h3>PLUS ULTRA!!</h3>
+                <p>Mecânica ativada apenas na zona de <strong>COLAPSO</strong>. Quebre seus limites para retornar imediatamente ao início da <strong>Zona Laranja</strong>.</p>
+                <p><small>(Limite: 1 vez por evento)</small></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="equipamentos" class="tab-content">
+        <div class="section-card">
+            <h2>Departamento de Suporte</h2>
+            <p>Equipamentos de suporte auxiliam no controle da individualidade e mitigam os efeitos de exaustão.</p>
+            
+            <div class="rank-grid">
+                <div class="rank-card">
+                    <span class="rank-tag" style="background: #7f8c8d;">BASE</span>
+                    <p>Proteção básica e utilidade padrão da U.A.</p>
+                </div>
+                <div class="rank-card">
+                    <span class="rank-tag" style="background: var(--rank-c);">RANK C</span>
+                    <p>Melhorias leves para o cotidiano heróico.</p>
+                </div>
+                <div class="rank-card">
+                    <span class="rank-tag" style="background: var(--rank-b);">RANK B</span>
+                    <p>Equipamento tático para combates prolongados.</p>
+                </div>
+                <div class="rank-card">
+                    <span class="rank-tag" style="background: var(--rank-a);">RANK A</span>
+                    <p>Tecnologia avançada de controle energético.</p>
+                </div>
+                <div class="rank-card" style="border-color: var(--rank-s); box-shadow: 0 0 10px rgba(241, 196, 15, 0.4);">
+                    <span class="rank-tag" style="background: var(--rank-s); color: #000;">RANK S</span>
+                    <p>Elite. Itens que desafiam os limites do corpo.</p>
+                </div>
+            </div>
+
+            <div class="obtenção-info">
+                ⚠️ IMPORTANTE: Cartões de equipamentos são recompensas exclusivas de Aulas Específicas e Eventos Narrativos.
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>Manutenção & Reparo</h2>
+            <p>Itens de suporte podem sofrer danos. Danos pesados em combate podem desativar as funções de Rank do item até que ele seja reparado por especialistas.</p>
+        </div>
+    </div>
+
+</div>
+
+<footer>
+    U.A. High School Portal - Go Beyond!
+</footer>
+
+<script>
+    function openTab(tabName) {
+        const contents = document.querySelectorAll('.tab-content');
+        const btns = document.querySelectorAll('.tab-btn');
+        
+        contents.forEach(c => c.classList.remove('active'));
+        btns.forEach(b => b.classList.remove('active'));
+        
+        document.getElementById(tabName).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+</script>
+
+</body>
+  </html>
+  
